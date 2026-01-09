@@ -26,6 +26,11 @@ class DBHandler:
         """
         self.cursor.execute(query)
         self.connection.commit()
+    def get_post_by_title(self, title):
+        """Ищет пост в базе по заголовку и возвращает его"""
+        query = "SELECT * FROM posts WHERE title = %s;"
+        self.cursor.execute(query, (title,))
+        return self.cursor.fetchone() # Возвращает одну строку из БД    
 
     def create_post(self, title, body, user_id):
         query = "INSERT INTO posts (title, body, user_id) VALUES (%s, %s, %s);"
