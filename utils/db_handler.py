@@ -11,8 +11,25 @@ class DBHandler:
             host=os.getenv("DB_HOST", "host.docker.internal"),
             port=os.getenv("DB_PORT", "5432")
         )
+        self.connection = psycopg2.connect(...)
         self.cursor = self.connection.cursor()
-        
+        self.setup_db()
+
+    def setup_db(self):
+        """Создает необходимые таблицы, если их нет"""
+        query = """
+        CREATE TABLE IF NOT EXISTS posts (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            user_id INTEGER
+        );
+        """
+        self.cursor.execute(query)
+        self.connection.commit()
+
+
+
     def get_posts_count(self):
         self.cursor.execute("SELECT COUNT(*) FROM posts;")
         count = self.cursor.fetchone()[0]
