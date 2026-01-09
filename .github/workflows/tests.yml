@@ -6,17 +6,16 @@ jobs:
   automation-tests:
     runs-on: ubuntu-latest
     
-    # Поднимаем базу данных PostgreSQL как сервис
+    # Запускаем базу данных прямо в GitHub
     services:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: user
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: testdb
+          POSTGRES_DB: test_api_qa
         ports:
           - 5432:5432
-        # Ждем, пока база будет готова к работе
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -31,12 +30,13 @@ jobs:
         run: docker build -t qa-project-chaos .
 
       - name: Run all tests
+        # Добавляем переменные окружения, чтобы перекрыть локальные настройки
         run: |
           docker run --rm \
           --network host \
-          -e PYTHONPATH=/app \
           -e DB_HOST=localhost \
-          -e DB_USER=user \
+          -e DB_USER=postgres \
           -e DB_PASSWORD=password \
-          -e DB_NAME=testdb \
+          -e DB_NAME=test_api_qa \
+          -e PYTHONPATH=/app \
           qa-project-chaos pytest tests/

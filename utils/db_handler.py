@@ -3,15 +3,16 @@ import os
 
 class DBHandler:
     def __init__(self):
+        # Используем os.getenv, чтобы приоритет был у настроек из CI
         self.connection = psycopg2.connect(
-            dbname="test_api_qa", 
-            user="postgres", 
-            password="1337", 
-            host="host.docker.internal", 
-            port="5432"
+            dbname=os.getenv("DB_NAME", "test_api_qa"),
+            user=os.getenv("DB_USER", "postgres"),
+            password=os.getenv("DB_PASSWORD", "1337"),
+            host=os.getenv("DB_HOST", "host.docker.internal"),
+            port=os.getenv("DB_PORT", "5432")
         )
         self.cursor = self.connection.cursor()
-
+        
     def get_posts_count(self):
         self.cursor.execute("SELECT COUNT(*) FROM posts;")
         count = self.cursor.fetchone()[0]
