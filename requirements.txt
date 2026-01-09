@@ -1,0 +1,10 @@
+pytest
+pytest-playwright
+pytest-html
+pytest-base-url
+pytest-xdist
+faker
+psycopg2-binary==2.9.11
+allure-pytest==2.13.5
+faker== 33.3.0
+jsonschema==4.23.0
