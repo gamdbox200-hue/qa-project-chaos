@@ -29,3 +29,21 @@ def test_db_title_boundaries(db_session, title, body, test_case_name):
         
     with allure.step("Очистка данных"):
         db_session.delete_post_by_title(title)
+
+@allure.feature("Database Integration")
+@allure.story("Negative Testing")
+def test_db_empty_title_error(db_session):
+    allure.dynamic.title("Негативный тест: Создание поста с пустым заголовком")
+    
+    with allure.step("Попытка создания записи с пустым заголовком"):
+        # Допустим, мы ожидаем, что база выкинет ошибку IntegrityError или ValueError
+        # Если твой DBHandler пока никак не валидирует данные, 
+        # этот тест может упасть, и это будет поводом для рефакторинга!
+        
+        with pytest.raises(Exception) as excinfo:
+            db_session.create_post("", "This should fail", 1)
+            
+    with allure.step("Проверка, что ошибка была перехвачена"):
+        # Мы проверяем, что какая-то ошибка вообще возникла
+        assert excinfo is not None
+        allure.attach(str(excinfo.value), name="Текст ошибки", attachment_type=allure.attachment_type.TEXT)
