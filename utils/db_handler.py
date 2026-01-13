@@ -33,6 +33,10 @@ class DBHandler:
         return self.cursor.fetchone() # Возвращает одну строку из БД    
 
     def create_post(self, title, body, user_id):
+        # Добавляем валидацию на уровне Python
+        if len(title) < 5:
+            raise ValueError(f"Заголовок слишком короткий: {len(title)} симв. Минимум 5.")
+            
         query = "INSERT INTO posts (title, body, user_id) VALUES (%s, %s, %s);"
         self.cursor.execute(query, (title, body, user_id))
         self.connection.commit()
