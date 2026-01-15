@@ -26,13 +26,21 @@ def browser_context_args(browser_context_args):
 def posts_api(base_url):
     return PostsClient(base_url)
 
-@pytest.fixture
-def db_session():
-    # SETUP: Подключаемся к базе
-    db = DBHandler()
-    yield db  # Здесь запускается сам тест
-    # TEARDOWN: После теста закрываем всё
-    db.close()
+@pytest.fixture(scope="session")
+def db_handler():
+    """Создает один экземпляр хендлера на всю сессию"""
+    handler = DBHandler() 
+    yield handler
+    handler.close()
+
+@pytest.fixture(scope="function")
+def db_session(db_handler):
+    """
+    Дает тест-кейсу доступ к БД. 
+    Тут можно добавить логику очистки таблиц ПЕРЕД каждым тестом.
+    """
+    # Например: db_handler.clear_tables() 
+    return db_handler
 
 @pytest.fixture
 def temp_post(db_session):
