@@ -1,38 +1,20 @@
-# 1. Импорты (обязательно)
-from playwright.sync_api import sync_playwright, expect  # sync для простоты, async потом
+# tests/test_login.py
 import pytest
+from playwright.async_api import Page, expect
+from pages.your_login_page import LoginPage  # если есть POM
 
-# 2. Фикстура для браузера (лучше в conftest.py, но пока здесь)
-@pytest.fixture(scope="function")
-def page():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # visible для дебага
-        context = browser.new_context()
-        page = context.new_page()
-        yield page
-        context.close()
-        browser.close()
+@pytest.mark.asyncio
+async def test_successful_login(page: Page):
+    await page.goto("https://the-internet.herokuapp.com/login")
 
-# 3. Сам тест
-def test_successful_login(page):
-    # Шаг 1: Открываем сайт (пример — публичный demo)
-    page.goto("https://the-internet.herokuapp.com/login")
+    await page.get_by_label("Username").fill("tomsmith")
+    await page.get_by_placeholder("Password").fill("SuperSecretPassword!")
+    await page.get_by_role("button", name="Login").click()
 
-    # Шаг 2: Находим поле username по label
-    username_field = page.get_by_label("Username")
-    username_field.fill("tomsmith")  # fill = ввод текста
+    success_msg = page.get_by_text("You logged into a secure area!")
+    await expect(success_msg).to_be_visible()
 
-    # Шаг 3: Пароль по placeholder
-    password_field = page.get_by_placeholder("Password")
-    password_field.fill("SuperSecretPassword!")
-
-    # Шаг 4: Кнопка Login по роли и тексту
-    login_button = page.get_by_role("button", name="Login")
-    login_button.click()
-
-    # Шаг 5: Проверяем успех (по тексту)
-    success_message = page.get_by_text("You logged into a secure area!")
-    expect(success_message).to_be_visible()  # assert-like, ждёт автоматически
-
-    # Бонус: скриншот на успех
-    page.screenshot(path="success_login.png")
+    # Скриншот + Allure (лучше здесь!)
+    screenshot_path = "success_login.png"
+    await page.screenshot(path=screenshot_path)
+    allure.attach.file(screenshot_path, name="Success Login", attachment_type=allure.attachment_type.PNG)
